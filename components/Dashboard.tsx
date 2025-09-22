@@ -29,6 +29,20 @@ interface DashboardProps {
 
 type Tab = 'overview' | 'medications' | 'appointments' | 'records' | 'reports' | 'notifications';
 
+const TabButton: React.FC<{tabName: Tab, activeTab: Tab, icon: React.ReactNode, label: string, onClick: (tabName: Tab) => void}> = ({tabName, activeTab, icon, label, onClick}) => (
+    <button
+        onClick={() => onClick(tabName)}
+        className={`flex items-center space-x-2 px-4 py-3 font-semibold text-lg rounded-t-lg border-b-4 transition-colors duration-200 ${
+        activeTab === tabName
+            ? 'border-blue-500 text-blue-600'
+            : 'border-transparent text-slate-500 hover:text-blue-500'
+        }`}
+    >
+        {icon}
+        <span>{label}</span>
+    </button>
+);
+
 const Dashboard: React.FC<DashboardProps> = ({ 
   patient, 
   onSaveMedication, 
@@ -196,19 +210,6 @@ const Dashboard: React.FC<DashboardProps> = ({
     }
   };
   
-  const TabButton: React.FC<{tabName: Tab, icon: React.ReactNode, label: string}> = ({tabName, icon, label}) => (
-    <button
-        onClick={() => setActiveTab(tabName)}
-        className={`flex items-center space-x-2 px-4 py-3 font-semibold text-lg rounded-t-lg border-b-4 transition-colors duration-200 ${
-        activeTab === tabName
-            ? 'border-blue-500 text-blue-600'
-            : 'border-transparent text-slate-500 hover:text-blue-500'
-        }`}
-    >
-        {icon}
-        <span>{label}</span>
-    </button>
-  );
 
   return (
     <>
@@ -222,12 +223,12 @@ const Dashboard: React.FC<DashboardProps> = ({
         </header>
         
         <nav className="flex border-b border-slate-200 flex-wrap">
-          <TabButton tabName="overview" icon={<HeartPulseIcon className="w-6 h-6"/>} label="Overview" />
-          <TabButton tabName="medications" icon={<ClipboardListIcon className="w-6 h-6"/>} label="Medications" />
-          <TabButton tabName="appointments" icon={<CalendarIcon className="w-6 h-6"/>} label="Appointments" />
-          <TabButton tabName="records" icon={<PaperclipIcon className="w-6 h-6"/>} label="Records" />
-          <TabButton tabName="reports" icon={<ChartBarIcon className="w-6 h-6"/>} label="Reports" />
-          <TabButton tabName="notifications" icon={<BellIcon className="w-6 h-6"/>} label="Notifications" />
+          <TabButton tabName="overview" activeTab={activeTab} onClick={setActiveTab} icon={<HeartPulseIcon className="w-6 h-6"/>} label="Overview" />
+          <TabButton tabName="medications" activeTab={activeTab} onClick={setActiveTab} icon={<ClipboardListIcon className="w-6 h-6"/>} label="Medications" />
+          <TabButton tabName="appointments" activeTab={activeTab} onClick={setActiveTab} icon={<CalendarIcon className="w-6 h-6"/>} label="Appointments" />
+          <TabButton tabName="records" activeTab={activeTab} onClick={setActiveTab} icon={<PaperclipIcon className="w-6 h-6"/>} label="Records" />
+          <TabButton tabName="reports" activeTab={activeTab} onClick={setActiveTab} icon={<ChartBarIcon className="w-6 h-6"/>} label="Reports" />
+          <TabButton tabName="notifications" activeTab={activeTab} onClick={setActiveTab} icon={<BellIcon className="w-6 h-6"/>} label="Notifications" />
         </nav>
 
         <div className="bg-white p-6 rounded-lg shadow-md">

@@ -19,6 +19,13 @@ const initialFormData: AppointmentFormData = {
     dateTime: new Date().toISOString(),
 };
 
+const FormRow: React.FC<{label: string, children: React.ReactNode}> = ({label, children}) => (
+  <div>
+      <label className="block text-lg font-medium text-slate-700 mb-1">{label}</label>
+      {children}
+  </div>
+);
+
 const AppointmentFormModal: React.FC<AppointmentFormModalProps> = ({ isOpen, onClose, onSave, appointmentToEdit }) => {
   const [formData, setFormData] = useState<AppointmentFormData>(initialFormData);
 
@@ -65,12 +72,6 @@ const AppointmentFormModal: React.FC<AppointmentFormModalProps> = ({ isOpen, onC
     onSave(formData);
   };
   
-  const FormRow: React.FC<{label: string, children: React.ReactNode}> = ({label, children}) => (
-    <div>
-        <label className="block text-lg font-medium text-slate-700 mb-1">{label}</label>
-        {children}
-    </div>
-  );
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={appointmentToEdit ? 'Edit Appointment' : 'Add New Appointment'}>

@@ -19,6 +19,13 @@ const initialFormData: MedicationFormData = {
     duration: '',
 };
 
+const FormRow: React.FC<{label: string, children: React.ReactNode}> = ({label, children}) => (
+  <div>
+      <label className="block text-lg font-medium text-slate-700 mb-1">{label}</label>
+      {children}
+  </div>
+);
+
 const MedicationFormModal: React.FC<MedicationFormModalProps> = ({ isOpen, onClose, onSave, medicationToEdit }) => {
   const [formData, setFormData] = useState<MedicationFormData>(initialFormData);
 
@@ -44,13 +51,6 @@ const MedicationFormModal: React.FC<MedicationFormModalProps> = ({ isOpen, onClo
     e.preventDefault();
     onSave(formData);
   };
-  
-  const FormRow: React.FC<{label: string, children: React.ReactNode}> = ({label, children}) => (
-    <div>
-        <label className="block text-lg font-medium text-slate-700 mb-1">{label}</label>
-        {children}
-    </div>
-  );
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={medicationToEdit ? 'Edit Medication' : 'Add New Medication'}>

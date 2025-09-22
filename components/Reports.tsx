@@ -10,6 +10,15 @@ interface ReportsProps {
 
 type AdherencePeriod = 'weekly' | 'monthly';
 
+const AdherenceBar: React.FC<{ percentage: number }> = ({ percentage }) => {
+  const bgColor = percentage >= 80 ? 'bg-green-500' : percentage >= 50 ? 'bg-yellow-500' : 'bg-red-500';
+  return (
+      <div className="w-full bg-slate-200 rounded-full h-4">
+          <div className={`${bgColor} h-4 rounded-full`} style={{ width: `${percentage}%` }}></div>
+      </div>
+  );
+};
+
 const Reports: React.FC<ReportsProps> = ({ patient }) => {
   const [adherencePeriod, setAdherencePeriod] = useState<AdherencePeriod>('weekly');
 
@@ -57,16 +66,6 @@ const Reports: React.FC<ReportsProps> = ({ patient }) => {
       .filter(app => new Date(app.dateTime) < new Date())
       .sort((a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime());
   }, [patient.appointments]);
-
-
-  const AdherenceBar: React.FC<{ percentage: number }> = ({ percentage }) => {
-    const bgColor = percentage >= 80 ? 'bg-green-500' : percentage >= 50 ? 'bg-yellow-500' : 'bg-red-500';
-    return (
-        <div className="w-full bg-slate-200 rounded-full h-4">
-            <div className={`${bgColor} h-4 rounded-full`} style={{ width: `${percentage}%` }}></div>
-        </div>
-    );
-  };
   
   return (
     <div className="space-y-8">

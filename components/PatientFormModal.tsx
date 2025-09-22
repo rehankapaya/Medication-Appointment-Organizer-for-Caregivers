@@ -37,6 +37,13 @@ const initialFormData = {
     }
 };
 
+const FormRow: React.FC<{label: string, children: React.ReactNode}> = ({label, children}) => (
+  <div>
+      <label className="block text-lg font-medium text-slate-700 mb-1">{label}</label>
+      {children}
+  </div>
+);
+
 const PatientFormModal: React.FC<PatientFormModalProps> = ({ isOpen, onClose, onSave, patientToEdit }) => {
   const [formData, setFormData] = useState<Omit<Patient, 'id' | 'medications' | 'appointments' | 'healthRecords'>>(initialFormData);
 
@@ -88,13 +95,6 @@ const PatientFormModal: React.FC<PatientFormModalProps> = ({ isOpen, onClose, on
     onSave(patientData);
   };
   
-  const FormRow: React.FC<{label: string, children: React.ReactNode}> = ({label, children}) => (
-    <div>
-        <label className="block text-lg font-medium text-slate-700 mb-1">{label}</label>
-        {children}
-    </div>
-  );
-
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={patientToEdit ? 'Edit Patient Profile' : 'Add New Patient'}>
       <form onSubmit={handleSubmit} className="p-6 space-y-4">

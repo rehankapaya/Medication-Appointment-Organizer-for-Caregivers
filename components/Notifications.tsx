@@ -8,6 +8,27 @@ interface NotificationsProps {
   onSave: (patientId: string, settings: NotificationSettings) => void;
 }
 
+const FormCard: React.FC<{title: string, children: React.ReactNode}> = ({ title, children }) => (
+    <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
+        <h2 className="text-2xl font-bold text-slate-800 mb-4">{title}</h2>
+        <div className="space-y-4">{children}</div>
+    </div>
+);
+
+const FormRow: React.FC<{label: string, children: React.ReactNode}> = ({label, children}) => (
+  <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-2">
+    <label className="block text-lg font-medium text-slate-700">{label}</label>
+    <div className="md:col-span-2">{children}</div>
+  </div>
+);
+
+const ToggleSwitch: React.FC<{name: string, checked: boolean, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void}> = ({ name, checked, onChange }) => (
+    <label className="relative inline-flex items-center cursor-pointer">
+      <input type="checkbox" name={name} checked={checked} onChange={onChange} className="sr-only peer" />
+      <div className="w-14 h-8 bg-slate-300 rounded-full peer peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-blue-600"></div>
+  </label>
+);
+
 const Notifications: React.FC<NotificationsProps> = ({ patient, onSave }) => {
   const [settings, setSettings] = useState<NotificationSettings>(patient.notificationSettings);
   const [isSaved, setIsSaved] = useState(false);
@@ -47,28 +68,6 @@ const Notifications: React.FC<NotificationsProps> = ({ patient, onSave }) => {
     setIsSaved(true);
     setTimeout(() => setIsSaved(false), 3000);
   };
-  
-  const FormCard: React.FC<{title: string, children: React.ReactNode}> = ({ title, children }) => (
-      <div className="bg-slate-50 p-6 rounded-lg border border-slate-200">
-          <h2 className="text-2xl font-bold text-slate-800 mb-4">{title}</h2>
-          <div className="space-y-4">{children}</div>
-      </div>
-  );
-
-  const FormRow: React.FC<{label: string, children: React.ReactNode}> = ({label, children}) => (
-    <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-2">
-      <label className="block text-lg font-medium text-slate-700">{label}</label>
-      <div className="md:col-span-2">{children}</div>
-    </div>
-  );
-  
-  const ToggleSwitch: React.FC<{name: string, checked: boolean, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void}> = ({ name, checked, onChange }) => (
-      <label className="relative inline-flex items-center cursor-pointer">
-        <input type="checkbox" name={name} checked={checked} onChange={onChange} className="sr-only peer" />
-        <div className="w-14 h-8 bg-slate-300 rounded-full peer peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-blue-600"></div>
-    </label>
-  );
-
 
   return (
     <form onSubmit={handleSubmit} className="max-w-4xl mx-auto space-y-8">

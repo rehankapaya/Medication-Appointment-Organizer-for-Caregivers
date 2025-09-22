@@ -21,6 +21,13 @@ const initialFormData: HealthRecordFormData = {
     fileUrl: '#',
 };
 
+const FormRow: React.FC<{label: string, children: React.ReactNode}> = ({label, children}) => (
+  <div>
+      <label className="block text-lg font-medium text-slate-700 mb-1">{label}</label>
+      {children}
+  </div>
+);
+
 const HealthRecordFormModal: React.FC<HealthRecordFormModalProps> = ({ isOpen, onClose, onSave, healthRecordToEdit }) => {
   const [formData, setFormData] = useState<HealthRecordFormData>(initialFormData);
 
@@ -56,12 +63,6 @@ const HealthRecordFormModal: React.FC<HealthRecordFormModalProps> = ({ isOpen, o
     onSave(formData);
   };
   
-  const FormRow: React.FC<{label: string, children: React.ReactNode}> = ({label, children}) => (
-    <div>
-        <label className="block text-lg font-medium text-slate-700 mb-1">{label}</label>
-        {children}
-    </div>
-  );
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={healthRecordToEdit ? 'Edit Health Record' : 'Add New Health Record'}>
