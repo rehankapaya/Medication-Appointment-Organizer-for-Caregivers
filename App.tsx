@@ -4,9 +4,21 @@ import Dashboard from './components/Dashboard';
 import PatientFormModal from './components/PatientFormModal';
 import ConfirmationModal from './components/ConfirmationModal';
 import { MOCK_CAREGIVER, MOCK_PATIENTS } from './constants';
-import type { Patient, Medication, MedicationStatus, HealthRecord, Appointment, NotificationSettings } from './types';
+import type { Patient, Medication, MedicationStatus, HealthRecord, Appointment, NotificationSettings, Caregiver } from './types';
 
 const App: React.FC = () => {
+    const [caregiver, setCaregiver] = useState<Caregiver>(() => {
+    try {
+      const savedData = localStorage.getItem('caregiver_companion_caregiver');
+      if (savedData !== null) {
+        return JSON.parse(savedData);
+      }
+    } catch (error) {
+        console.error("Could not load caregiver from localStorage", error);
+    }
+    return MOCK_CAREGIVER;
+  });
+
   const [patients, setPatients] = useState<Patient[]>(() => {
     try {
       const savedData = localStorage.getItem('caregiver_companion_data');
@@ -19,7 +31,26 @@ const App: React.FC = () => {
     return MOCK_PATIENTS;
   });
 
-  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(patients.length > 0 ? patients[0] : null);
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(() => {
+    const initialPatients = (() => {
+        try {
+            const savedData = localStorage.getItem('caregiver_companion_data');
+            return savedData ? JSON.parse(savedData) : MOCK_PATIENTS;
+        } catch (error) {
+            console.error("Could not load patients from localStorage for initial selection", error);
+            return MOCK_PATIENTS;
+        }
+    })();
+
+    const savedPatientId = localStorage.getItem('caregiver_companion_selected_patient_id');
+    if (savedPatientId) {
+        const patient = initialPatients.find((p: Patient) => p.id === savedPatientId);
+        if (patient) {
+            return patient;
+        }
+    }
+    return initialPatients.length > 0 ? initialPatients[0] : null;
+  });
   
   // Patient form modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -28,7 +59,17 @@ const App: React.FC = () => {
   // Confirmation modal state
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [patientToDelete, setPatientToDelete] = useState<string | null>(null);
+  
+  // Persist caregiver to localStorage
+  useEffect(() => {
+    try {
+        localStorage.setItem('caregiver_companion_caregiver', JSON.stringify(caregiver));
+    } catch (error) {
+        console.error("Could not save caregiver to localStorage", error);
+    }
+  }, [caregiver]);
 
+  // Persist the full patient list to localStorage
   useEffect(() => {
     try {
         localStorage.setItem('caregiver_companion_data', JSON.stringify(patients));
@@ -37,13 +78,22 @@ const App: React.FC = () => {
     }
   }, [patients]);
   
-  // When patients list changes, re-evaluate selectedPatient
+  // Persist the selected patient's ID to localStorage
   useEffect(() => {
-    if (selectedPatient && !patients.find(p => p.id === selectedPatient.id)) {
-        // If selected patient is no longer in the list, update selection
+    if (selectedPatient) {
+      localStorage.setItem('caregiver_companion_selected_patient_id', selectedPatient.id);
+    } else {
+      localStorage.removeItem('caregiver_companion_selected_patient_id');
+    }
+  }, [selectedPatient]);
+
+  // When patients list changes, ensure the selected patient is still valid
+  useEffect(() => {
+    if (selectedPatient && !patients.some(p => p.id === selectedPatient.id)) {
+        // If selected patient was deleted, select the first patient
         setSelectedPatient(patients.length > 0 ? patients[0] : null);
     } else if (!selectedPatient && patients.length > 0) {
-        // If no patient is selected and list is not empty, select first one
+        // If no patient is selected, but there are patients, select the first one
         setSelectedPatient(patients[0]);
     }
   }, [patients, selectedPatient]);
@@ -71,14 +121,7 @@ const App: React.FC = () => {
   const handleConfirmDelete = () => {
     if (!patientToDelete) return;
 
-    setPatients(prev => {
-        const newPatients = prev.filter(p => p.id !== patientToDelete);
-        // If the selected patient is deleted, selection logic in useEffect will handle it
-        if (selectedPatient?.id === patientToDelete) {
-            setSelectedPatient(newPatients.length > 0 ? newPatients[0] : null);
-        }
-        return newPatients;
-    });
+    setPatients(prev => prev.filter(p => p.id !== patientToDelete));
 
     setIsConfirmModalOpen(false);
     setPatientToDelete(null);
@@ -260,7 +303,7 @@ const App: React.FC = () => {
   return (
     <div className="flex h-screen bg-slate-100 font-sans">
       <Sidebar
-        caregiver={MOCK_CAREGIVER}
+        caregiver={caregiver}
         patients={patients}
         selectedPatient={selectedPatient!}
         onSelectPatient={handleSelectPatient}
