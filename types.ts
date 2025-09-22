@@ -42,6 +42,21 @@ export interface HealthRecord {
   fileUrl: string; // a mock url
 }
 
+export interface NotificationSettings {
+  reminders: {
+    medication: boolean;
+    appointment: boolean;
+  };
+  escalationAlerts: {
+    enabled: boolean;
+    missedDosesThreshold: number;
+  };
+  contact: {
+    email: string;
+    phone: string;
+  };
+}
+
 export interface Patient {
   id: string;
   name: string;
@@ -57,6 +72,7 @@ export interface Patient {
   medications: Medication[];
   appointments: Appointment[];
   healthRecords: HealthRecord[];
+  notificationSettings: NotificationSettings;
 }
 
 export interface AppointmentConflict {

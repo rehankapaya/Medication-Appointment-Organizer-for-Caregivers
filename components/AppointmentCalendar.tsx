@@ -1,13 +1,16 @@
 
 import React, { useState } from 'react';
 import type { Appointment } from '../types';
-import { ChevronLeftIcon, ChevronRightIcon } from './icons/Icons';
+import { ChevronLeftIcon, ChevronRightIcon, PencilIcon, PlusCircleIcon, TrashIcon } from './icons/Icons';
 
 interface AppointmentCalendarProps {
   appointments: Appointment[];
+  onAdd: () => void;
+  onEdit: (appointment: Appointment) => void;
+  onDelete: (appointment: Appointment) => void;
 }
 
-const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({ appointments }) => {
+const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({ appointments, onAdd, onEdit, onDelete }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
@@ -58,13 +61,22 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({ appointments 
         <h2 className="text-2xl font-bold text-slate-800">
           {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
         </h2>
-        <div className="flex space-x-2">
-          <button onClick={handlePrevMonth} className="p-2 rounded-full hover:bg-slate-100 transition-colors">
-            <ChevronLeftIcon className="w-6 h-6 text-slate-600" />
+        <div className="flex items-center space-x-4">
+          <button 
+            onClick={onAdd}
+            className="flex items-center justify-center space-x-2 px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition-colors"
+          >
+              <PlusCircleIcon className="w-5 h-5" />
+              <span>Add Appointment</span>
           </button>
-          <button onClick={handleNextMonth} className="p-2 rounded-full hover:bg-slate-100 transition-colors">
-            <ChevronRightIcon className="w-6 h-6 text-slate-600" />
-          </button>
+          <div className="flex space-x-1">
+            <button onClick={handlePrevMonth} className="p-2 rounded-full hover:bg-slate-100 transition-colors">
+              <ChevronLeftIcon className="w-6 h-6 text-slate-600" />
+            </button>
+            <button onClick={handleNextMonth} className="p-2 rounded-full hover:bg-slate-100 transition-colors">
+              <ChevronRightIcon className="w-6 h-6 text-slate-600" />
+            </button>
+          </div>
         </div>
       </div>
       <div className="flex flex-col lg:flex-row gap-6">
@@ -109,11 +121,19 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({ appointments 
                         {selectedAppointments
                             .sort((a,b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime())
                             .map(app => (
-                            <li key={app.id} className="p-3 bg-white rounded-md shadow-sm border-l-4 border-blue-500">
+                            <li key={app.id} className="group relative p-3 bg-white rounded-md shadow-sm border-l-4 border-blue-500">
                                 <p className="font-bold text-slate-800 text-lg">{new Date(app.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                                 <p className="text-slate-600 font-semibold">Dr. {app.doctorName}</p>
                                 <p className="text-slate-500">{app.specialty}</p>
                                 <p className="text-sm text-slate-500 mt-1">{app.location}</p>
+                                <div className="absolute top-2 right-2 flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button onClick={() => onEdit(app)} className="p-1.5 rounded-full bg-slate-100 hover:bg-slate-200" aria-label={`Edit appointment`}>
+                                        <PencilIcon className="w-4 h-4 text-slate-600"/>
+                                    </button>
+                                    <button onClick={() => onDelete(app)} className="p-1.5 rounded-full bg-slate-100 hover:bg-red-400 text-slate-600 hover:text-white" aria-label={`Delete appointment`}>
+                                        <TrashIcon className="w-4 h-4"/>
+                                    </button>
+                                </div>
                             </li>
                         ))}
                     </ul>

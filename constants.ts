@@ -74,6 +74,20 @@ export const MOCK_PATIENTS: Patient[] = [
       { id: 'hr1', name: 'Latest Blood Work', type: 'Lab Report', uploadDate: new Date(Date.now() - 20 * 86400000).toISOString(), fileUrl: '#' },
       { id: 'hr2', name: 'Lisinopril Rx', type: 'Prescription', uploadDate: new Date(Date.now() - 90 * 86400000).toISOString(), fileUrl: '#' },
     ],
+    notificationSettings: {
+        reminders: {
+            medication: true,
+            appointment: true,
+        },
+        escalationAlerts: {
+            enabled: true,
+            missedDosesThreshold: 3,
+        },
+        contact: {
+            email: 'sarah.vance@example.com',
+            phone: '555-0101',
+        }
+    }
   },
   {
     id: 'p2',
@@ -94,7 +108,10 @@ export const MOCK_PATIENTS: Patient[] = [
         dosage: '81mg',
         frequency: 'Once daily',
         duration: 'Ongoing',
-        logs: [{ date: new Date(Date.now() - 86400000).toISOString(), status: MedicationStatus.Missed }],
+        logs: [
+            { date: new Date(Date.now() - 172800000).toISOString(), status: MedicationStatus.Missed },
+            { date: new Date(Date.now() - 86400000).toISOString(), status: MedicationStatus.Missed },
+        ],
       },
       {
         id: 'm5',
@@ -132,5 +149,19 @@ export const MOCK_PATIENTS: Patient[] = [
     healthRecords: [
       { id: 'hr3', name: 'Chest X-Ray Results', type: 'Lab Report', uploadDate: new Date(Date.now() - 60 * 86400000).toISOString(), fileUrl: '#' },
     ],
+    notificationSettings: {
+        reminders: {
+            medication: true,
+            appointment: false,
+        },
+        escalationAlerts: {
+            enabled: true,
+            missedDosesThreshold: 2, // Lower threshold to demo alert
+        },
+        contact: {
+            email: 'mark.pendelton@example.com',
+            phone: '555-0102',
+        }
+    }
   },
 ];

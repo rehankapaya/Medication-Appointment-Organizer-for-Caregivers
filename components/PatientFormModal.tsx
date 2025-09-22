@@ -20,6 +20,21 @@ const initialFormData = {
     },
     medicalHistory: [],
     allergies: [],
+    // FIX: Add default notificationSettings to match the Patient type.
+    notificationSettings: {
+        reminders: {
+            medication: true,
+            appointment: true,
+        },
+        escalationAlerts: {
+            enabled: true,
+            missedDosesThreshold: 3,
+        },
+        contact: {
+            email: '',
+            phone: '',
+        }
+    }
 };
 
 const PatientFormModal: React.FC<PatientFormModalProps> = ({ isOpen, onClose, onSave, patientToEdit }) => {
@@ -34,6 +49,8 @@ const PatientFormModal: React.FC<PatientFormModalProps> = ({ isOpen, onClose, on
         personalInfo: patientToEdit.personalInfo,
         medicalHistory: patientToEdit.medicalHistory,
         allergies: patientToEdit.allergies,
+        // FIX: Add notificationSettings when editing a patient.
+        notificationSettings: patientToEdit.notificationSettings,
       });
     } else {
       setFormData(initialFormData);
@@ -63,7 +80,8 @@ const PatientFormModal: React.FC<PatientFormModalProps> = ({ isOpen, onClose, on
           id: `p${Date.now()}`, 
           medications: [], 
           appointments: [],
-          healthRecords: [] 
+          healthRecords: [],
+          notificationSettings: initialFormData.notificationSettings, // Ensure new patient gets settings
       }),
       ...formData,
     };
