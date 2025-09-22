@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import PatientFormModal from './components/PatientFormModal';
@@ -8,7 +7,18 @@ import { MOCK_CAREGIVER, MOCK_PATIENTS } from './constants';
 import type { Patient, Medication, MedicationStatus, HealthRecord, Appointment, NotificationSettings } from './types';
 
 const App: React.FC = () => {
-  const [patients, setPatients] = useState<Patient[]>(MOCK_PATIENTS);
+  const [patients, setPatients] = useState<Patient[]>(() => {
+    try {
+      const savedData = localStorage.getItem('caregiver_companion_data');
+      if (savedData !== null) {
+        return JSON.parse(savedData);
+      }
+    } catch (error) {
+        console.error("Could not load patients from localStorage", error);
+    }
+    return MOCK_PATIENTS;
+  });
+
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(patients.length > 0 ? patients[0] : null);
   
   // Patient form modal state
@@ -18,6 +28,25 @@ const App: React.FC = () => {
   // Confirmation modal state
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [patientToDelete, setPatientToDelete] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+        localStorage.setItem('caregiver_companion_data', JSON.stringify(patients));
+    } catch (error) {
+        console.error("Could not save patients to localStorage", error);
+    }
+  }, [patients]);
+  
+  // When patients list changes, re-evaluate selectedPatient
+  useEffect(() => {
+    if (selectedPatient && !patients.find(p => p.id === selectedPatient.id)) {
+        // If selected patient is no longer in the list, update selection
+        setSelectedPatient(patients.length > 0 ? patients[0] : null);
+    } else if (!selectedPatient && patients.length > 0) {
+        // If no patient is selected and list is not empty, select first one
+        setSelectedPatient(patients[0]);
+    }
+  }, [patients, selectedPatient]);
 
 
   const handleSelectPatient = (patient: Patient) => {
@@ -44,9 +73,9 @@ const App: React.FC = () => {
 
     setPatients(prev => {
         const newPatients = prev.filter(p => p.id !== patientToDelete);
-        // If the selected patient is deleted, select the first one in the new list or null
+        // If the selected patient is deleted, selection logic in useEffect will handle it
         if (selectedPatient?.id === patientToDelete) {
-            setSelectedPatient(newPatients.length > 0 ? newPatients[0] : null!);
+            setSelectedPatient(newPatients.length > 0 ? newPatients[0] : null);
         }
         return newPatients;
     });
