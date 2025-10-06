@@ -1,7 +1,7 @@
 
 import React from 'react';
 import type { Caregiver, Patient } from '../types';
-import { UserIcon, UsersIcon, PlusCircleIcon, PencilIcon, TrashIcon } from './icons/Icons';
+import { UserIcon, UsersIcon, PlusCircleIcon, PencilIcon, TrashIcon, LogOutIcon } from './icons/Icons';
 
 interface SidebarProps {
   caregiver: Caregiver;
@@ -11,6 +11,7 @@ interface SidebarProps {
   onAddPatientClick: () => void;
   onEditPatientClick: (patient: Patient) => void;
   onDeletePatient: (patientId: string) => void;
+  onLogout: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -21,6 +22,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   onAddPatientClick,
   onEditPatientClick,
   onDeletePatient,
+  onLogout,
 }) => {
   return (
     <aside className="w-64 flex-shrink-0 bg-white shadow-lg flex flex-col">
@@ -70,7 +72,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           ))}
         </ul>
       </nav>
-      <div className="p-4 mt-auto border-t border-slate-200">
+      <div className="p-4 mt-auto border-t border-slate-200 space-y-2">
         <button
           onClick={onAddPatientClick}
           className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition-colors"
@@ -78,7 +80,14 @@ const Sidebar: React.FC<SidebarProps> = ({
           <PlusCircleIcon className="w-6 h-6" />
           <span>New Patient</span>
         </button>
-        <p className="text-xs text-slate-400 mt-4 text-center">Caregiver's Companion v1.0</p>
+        <button
+          onClick={onLogout}
+          className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-slate-200 text-slate-700 font-semibold rounded-lg hover:bg-slate-300 transition-colors"
+        >
+          <LogOutIcon className="w-5 h-5" />
+          <span>Logout</span>
+        </button>
+        <p className="text-xs text-slate-400 pt-2 text-center">Caregiver's Companion v1.0</p>
       </div>
     </aside>
   );

@@ -2,6 +2,8 @@
 export interface Caregiver {
   id: string;
   name: string;
+  email: string;
+  password?: string; // Only used for auth, not passed around
   avatarUrl: string;
 }
 

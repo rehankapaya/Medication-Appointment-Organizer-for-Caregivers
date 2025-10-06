@@ -1,57 +1,78 @@
+
 import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import PatientFormModal from './components/PatientFormModal';
 import ConfirmationModal from './components/ConfirmationModal';
-import { MOCK_CAREGIVER, MOCK_PATIENTS } from './constants';
+import AuthPage from './components/AuthPage';
+import { MOCK_PATIENTS } from './constants';
 import type { Patient, Medication, MedicationStatus, HealthRecord, Appointment, NotificationSettings, Caregiver } from './types';
 
 const App: React.FC = () => {
-    const [caregiver, setCaregiver] = useState<Caregiver>(() => {
-    try {
-      const savedData = localStorage.getItem('caregiver_companion_caregiver');
-      if (savedData !== null) {
-        return JSON.parse(savedData);
-      }
-    } catch (error) {
-        console.error("Could not load caregiver from localStorage", error);
-    }
-    return MOCK_CAREGIVER;
-  });
-
-  const [patients, setPatients] = useState<Patient[]>(() => {
-    try {
-      const savedData = localStorage.getItem('caregiver_companion_data');
-      if (savedData !== null) {
-        return JSON.parse(savedData);
-      }
-    } catch (error) {
-        console.error("Could not load patients from localStorage", error);
-    }
-    return MOCK_PATIENTS;
-  });
-
-  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(() => {
-    const initialPatients = (() => {
+    const [currentCaregiver, setCurrentCaregiver] = useState<Caregiver | null>(() => {
         try {
-            const savedData = localStorage.getItem('caregiver_companion_data');
-            return savedData ? JSON.parse(savedData) : MOCK_PATIENTS;
+            const loggedInUserId = localStorage.getItem('caregivers_companion_logged_in_user_id');
+            if (loggedInUserId) {
+                const allUsers: Caregiver[] = JSON.parse(localStorage.getItem('caregivers_companion_all_users') || '[]');
+                return allUsers.find(user => user.id === loggedInUserId) || null;
+            }
         } catch (error) {
-            console.error("Could not load patients from localStorage for initial selection", error);
-            return MOCK_PATIENTS;
+            console.error("Could not load logged-in user from localStorage", error);
         }
-    })();
+        return null;
+    });
 
-    const savedPatientId = localStorage.getItem('caregiver_companion_selected_patient_id');
-    if (savedPatientId) {
-        const patient = initialPatients.find((p: Patient) => p.id === savedPatientId);
-        if (patient) {
-            return patient;
+    const [patients, setPatients] = useState<Patient[]>([]);
+    const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+
+    // Load patients when caregiver changes
+    useEffect(() => {
+        if (currentCaregiver) {
+            try {
+                const savedData = localStorage.getItem(`caregiver_companion_patients_${currentCaregiver.id}`);
+                const parsedPatients = savedData ? JSON.parse(savedData) : null;
+                
+                if (parsedPatients) {
+                    setPatients(parsedPatients);
+                } else {
+                    const allUsers: Caregiver[] = JSON.parse(localStorage.getItem('caregivers_companion_all_users') || '[]');
+                    // Seed initial data for the very first registered user
+                    if (allUsers.length > 0 && allUsers[0].id === currentCaregiver.id) {
+                        setPatients(MOCK_PATIENTS);
+                    } else {
+                        setPatients([]);
+                    }
+                }
+            } catch (error) {
+                console.error("Could not load patients from localStorage", error);
+                setPatients([]);
+            }
+        } else {
+            setPatients([]);
+            setSelectedPatient(null);
         }
-    }
-    return initialPatients.length > 0 ? initialPatients[0] : null;
-  });
-  
+    }, [currentCaregiver]);
+
+    // When patients are loaded for a caregiver, set the selected patient
+    useEffect(() => {
+        if (currentCaregiver && patients.length > 0) {
+            try {
+                const savedPatientId = localStorage.getItem(`caregiver_companion_selected_patient_id_${currentCaregiver.id}`);
+                if (savedPatientId) {
+                    const patient = patients.find((p: Patient) => p.id === savedPatientId);
+                    setSelectedPatient(patient || patients[0]);
+                } else {
+                    setSelectedPatient(patients[0]);
+                }
+            } catch (error) {
+                console.error("Could not load selected patient from localStorage", error);
+                setSelectedPatient(patients[0]);
+            }
+        } else {
+           setSelectedPatient(null);
+        }
+    }, [patients, currentCaregiver]);
+
   // Patient form modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [patientToEdit, setPatientToEdit] = useState<Patient | null>(null);
@@ -60,32 +81,25 @@ const App: React.FC = () => {
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [patientToDelete, setPatientToDelete] = useState<string | null>(null);
   
-  // Persist caregiver to localStorage
+  // Persist the full patient list to localStorage, scoped to caregiver
   useEffect(() => {
-    try {
-        localStorage.setItem('caregiver_companion_caregiver', JSON.stringify(caregiver));
-    } catch (error) {
-        console.error("Could not save caregiver to localStorage", error);
+    if (currentCaregiver) {
+        try {
+            localStorage.setItem(`caregiver_companion_patients_${currentCaregiver.id}`, JSON.stringify(patients));
+        } catch (error) {
+            console.error("Could not save patients to localStorage", error);
+        }
     }
-  }, [caregiver]);
-
-  // Persist the full patient list to localStorage
-  useEffect(() => {
-    try {
-        localStorage.setItem('caregiver_companion_data', JSON.stringify(patients));
-    } catch (error) {
-        console.error("Could not save patients to localStorage", error);
-    }
-  }, [patients]);
+  }, [patients, currentCaregiver]);
   
-  // Persist the selected patient's ID to localStorage
+  // Persist the selected patient's ID to localStorage, scoped to caregiver
   useEffect(() => {
-    if (selectedPatient) {
-      localStorage.setItem('caregiver_companion_selected_patient_id', selectedPatient.id);
-    } else {
-      localStorage.removeItem('caregiver_companion_selected_patient_id');
+    if (currentCaregiver && selectedPatient) {
+      localStorage.setItem(`caregiver_companion_selected_patient_id_${currentCaregiver.id}`, selectedPatient.id);
+    } else if (currentCaregiver) {
+      localStorage.removeItem(`caregiver_companion_selected_patient_id_${currentCaregiver.id}`);
     }
-  }, [selectedPatient]);
+  }, [selectedPatient, currentCaregiver]);
 
   // When patients list changes, ensure the selected patient is still valid
   useEffect(() => {
@@ -98,6 +112,40 @@ const App: React.FC = () => {
     }
   }, [patients, selectedPatient]);
 
+  const handleLogin = async (email: string, password: string): Promise<boolean> => {
+    const allUsers: Caregiver[] = JSON.parse(localStorage.getItem('caregivers_companion_all_users') || '[]');
+    const user = allUsers.find(u => u.email === email && u.password === password);
+    if (user) {
+        setCurrentCaregiver(user);
+        localStorage.setItem('caregivers_companion_logged_in_user_id', user.id);
+        return true;
+    }
+    return false;
+  };
+
+  const handleSignup = async (name: string, email: string, password: string): Promise<boolean> => {
+    const allUsers: Caregiver[] = JSON.parse(localStorage.getItem('caregivers_companion_all_users') || '[]');
+    if (allUsers.some(u => u.email === email)) {
+        return false; // User already exists
+    }
+    const newUser: Caregiver = {
+        id: `cg${Date.now()}`,
+        name,
+        email,
+        password,
+        avatarUrl: `https://picsum.photos/seed/${name.split(' ')[0] || 'user'}/100/100`,
+    };
+    const updatedUsers = [...allUsers, newUser];
+    localStorage.setItem('caregivers_companion_all_users', JSON.stringify(updatedUsers));
+    
+    // Automatically log in the new user
+    return handleLogin(email, password);
+  };
+
+  const handleLogout = () => {
+    setCurrentCaregiver(null);
+    localStorage.removeItem('caregivers_companion_logged_in_user_id');
+  };
 
   const handleSelectPatient = (patient: Patient) => {
     setSelectedPatient(patient);
@@ -120,25 +168,21 @@ const App: React.FC = () => {
 
   const handleConfirmDelete = () => {
     if (!patientToDelete) return;
-
     setPatients(prev => prev.filter(p => p.id !== patientToDelete));
-
     setIsConfirmModalOpen(false);
     setPatientToDelete(null);
   };
 
   const handleSavePatient = (patientData: Patient) => {
     if (patientToEdit) {
-      // Update existing patient
       setPatients(prev => prev.map(p => p.id === patientData.id ? patientData : p));
       if (selectedPatient?.id === patientData.id) {
         setSelectedPatient(patientData);
       }
     } else {
-      // Add new patient
       const newPatient = { ...patientData, id: `p${Date.now()}` };
       setPatients(prev => [...prev, newPatient]);
-      setSelectedPatient(newPatient); // Automatically select the new patient
+      setSelectedPatient(newPatient);
     }
     setIsModalOpen(false);
   };
@@ -300,16 +344,21 @@ const App: React.FC = () => {
     }));
   };
 
+  if (!currentCaregiver) {
+    return <AuthPage onLogin={handleLogin} onSignup={handleSignup} />;
+  }
+
   return (
     <div className="flex h-screen bg-slate-100 font-sans">
       <Sidebar
-        caregiver={caregiver}
+        caregiver={currentCaregiver}
         patients={patients}
         selectedPatient={selectedPatient!}
         onSelectPatient={handleSelectPatient}
         onAddPatientClick={handleOpenModalForCreate}
         onEditPatientClick={handleOpenModalForEdit}
         onDeletePatient={handleDeletePatient}
+        onLogout={handleLogout}
       />
       <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
         {selectedPatient ? (

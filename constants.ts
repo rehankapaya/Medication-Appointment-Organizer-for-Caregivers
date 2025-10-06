@@ -1,12 +1,6 @@
 
-import type { Caregiver, Patient } from './types';
+import type { Patient } from './types';
 import { MedicationStatus } from './types';
-
-export const MOCK_CAREGIVER: Caregiver = {
-  id: 'cg1',
-  name: 'Alex Johnson',
-  avatarUrl: 'https://picsum.photos/seed/alex/100/100',
-};
 
 export const MOCK_PATIENTS: Patient[] = [
   {
