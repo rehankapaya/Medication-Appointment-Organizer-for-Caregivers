@@ -7,6 +7,22 @@ interface AuthPageProps {
     onSignup: (name: string, email: string, password: string) => Promise<boolean>;
 }
 
+const InputField: React.FC<{icon: React.ReactNode, type: string, placeholder: string, value: string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void}> = ({ icon, type, placeholder, value, onChange }) => (
+    <div className="relative">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+            {icon}
+        </div>
+        <input
+            type={type}
+            className="w-full pl-10 pr-3 py-3 border border-slate-300 rounded-lg text-lg focus:ring-blue-500 focus:border-blue-500 transition"
+            placeholder={placeholder}
+            value={value}
+            onChange={onChange}
+            required
+        />
+    </div>
+);
+
 const AuthPage: React.FC<AuthPageProps> = ({ onLogin, onSignup }) => {
     const [isLoginView, setIsLoginView] = useState(true);
     const [name, setName] = useState('');
@@ -35,22 +51,6 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin, onSignup }) => {
         setIsLoading(false);
     };
     
-    const InputField: React.FC<{icon: React.ReactNode, type: string, placeholder: string, value: string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void}> = ({ icon, type, placeholder, value, onChange }) => (
-        <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                {icon}
-            </div>
-            <input
-                type={type}
-                className="w-full pl-10 pr-3 py-3 border border-slate-300 rounded-lg text-lg focus:ring-blue-500 focus:border-blue-500 transition"
-                placeholder={placeholder}
-                value={value}
-                onChange={onChange}
-                required
-            />
-        </div>
-    );
-
     return (
         <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4 font-sans">
             <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 space-y-6">
